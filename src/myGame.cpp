@@ -3,6 +3,7 @@
 //
 #include "myGame.h"
 #include "stb_image.h"
+#include  "lan_util.h"
 #include <iostream>
 namespace Game{
 
@@ -17,13 +18,36 @@ namespace Game{
     bool myGame::firstMouse = true;
     mShoot *myGame::mshoot = nullptr;
 
-     myGame::myGame() {
+    myGame::myGame() {
+         spirit = nullptr; // Initialize to nullptr
          myGlfwInit();
          // 初始位置设为(0, 1.3, 3)，其中1.3 = 地面高度(-0.5) + 玩家高度(1.8)
          camera = new Camera((glm::vec3(0.0f, 1.3f, 3.0f)));
          sky = new skybox();
          floor = new mFloor();
-         model = new mModel();
+
+         mModel* nanoSuit = new mModel("nanosuit/nanosuit.obj");
+         nanoSuit->setP(2.0f, 2.0f, -0.5f);
+         nanoSuit->setScale(glm::vec3(0.005f));
+         models.push_back(nanoSuit);
+         
+         mModel* cyborg = new mModel("cyborg/cyborg.obj");
+         cyborg->setP(-2.0f, -2.0f, -0.5f);
+         cyborg->setScale(glm::vec3(0.5f));
+         models.push_back(cyborg);
+         
+         mModel* planet = new mModel("planet/planet.obj");
+         planet->setP(5.0f, 5.0f, -0.5f);
+         planet->setScale(glm::vec3(1.0f));
+         models.push_back(planet);
+         
+         // 加载 Spirit 模型作为玩家角色
+         spirit = new mModel("spirit/body.obj");
+         spirit->setP(0.0f, 0.0f, -0.5f); // 初始位置
+         spirit->setScale(glm::vec3(0.5f));
+         
+         model = nanoSuit;
+         
          mshoot = new mShoot();
          text = new mText();
          cd= new collisionDetector();
@@ -40,9 +64,16 @@ namespace Game{
          delete camera;
          delete sky;
          delete floor;
-         delete model;
+         delete spirit; // 释放 spirit 模型
+         
+         // 释放所有模型
+         for(auto* m : models) {
+             delete m;
+         }
+         models.clear();
+         model = nullptr;
+         
          delete text;
-         delete camera;
          delete mshoot;
          delete cd;
      }
@@ -85,6 +116,17 @@ namespace Game{
                     model->setP(cur.x,cur.z);
                     score++;
                 }
+
+                // 简单的多模型碰撞检测
+                for (auto* m : models) {
+                    if (m == model) continue; // 已经检测过主模型了
+                    BoxCollider mCollider(glm::vec3(m->p.x, 0.0f, m->p.z), glm::vec3(0.5f, 1.0f, 0.5f));
+                    if (collisionDetector::checkCollision(bulletCollider, mCollider)) {
+                        glm::vec3 cur = getRandomXZPosition();
+                        m->setP(cur.x, cur.z);
+                        score++;
+                    }
+                }
             }
 
             processInput(window);
@@ -112,7 +154,29 @@ namespace Game{
             //draw floor
             floor->draw(camera->GetViewMatrix(),projection);
             //draw model
-            model->draw(camera->GetViewMatrix(),projection);
+            for(auto* m : models) {
+                if(m) m->draw(camera->GetViewMatrix(),projection);
+            }
+
+            // 更新并绘制 Spirit 角色
+            // 让模型跟随摄像机位置，并在垂直方向上根据摄像机高度调整（假设摄像机是眼睛，模型在脚下）
+            // 摄像机高度初始为 1.3f，模型原点在脚底，所以偏移 1.3f
+            // 注意：地面高度 groundHeight 为 1.3f (对应camera.y)，实际物理地面可能是 -0.5f 或 0.0f
+            // 如果 mFloor 绘制在 0.0f (或 -0.5f)，我们需要匹配
+            // mFloor.h 中 vertices 是 y=-0.0f。所以地面在 0。
+            // 之前的 draw 用 -0.5f 可能是为了把中心在 (0,0,0) 的模型下沉一半高度？
+            // 假设 Spirit 模型原点在脚底，则应放在 camera.y - 1.8f (假设人高1.8，眼睛在1.8)
+            // 这里我们试探性地放在 camera.y - 1.8f
+            
+            if (spirit) {
+                // spirit->setP(camera->Position.x, camera->Position.z, camera->Position.y - 1.8f);
+                // 设置朝向：让模型背对摄像机（即面向摄像机的前方），摄像机 Yaw 0 指向 -Z
+                // 我们需要模型旋转 -Yaw - 90 度 (根据 LearnOpenGL 的 Euler 角定义)
+                // spirit->yaw = -camera->Yaw - 90.0f; 
+                spirit->draw(camera->GetViewMatrix(), projection);
+            }
+
+            //model->draw(camera->GetViewMatrix(),projection);
             //update mshoot and draw
             mshoot->update(deltaTime);
             mshoot->draw(camera->GetViewMatrix(),projection);
@@ -122,7 +186,7 @@ namespace Game{
                 glm::mat4 textProjection = glm::ortho(0.0f, (float)SCR_WIDTH, 0.0f, (float)SCR_HEIGHT);
                 //draw text
                 string scoreText = "score:" + to_string(score);
-                text->draw(scoreText.c_str(),0,0,1.0f,glm::vec3(0.0f,0.0f,1.0f), textProjection);
+                text->draw(scoreText,0,0,1.0f,glm::vec3(0.0f,0.0f,1.0f), textProjection);
             }
             
             // 渲染ImGui
@@ -268,18 +332,18 @@ void myGame::mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
 
 // glfw: whenever the mouse scroll wheel scrolls, this callback is called
 // ----------------------------------------------------------------------
-void myGame::scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+void myGame::scroll_callback(GLFWwindow* window, double xOffset, double yOffset)
 {
-    camera->ProcessMouseScroll(static_cast<float>(yoffset));
+    camera->ProcessMouseScroll(static_cast<float>(yOffset));
 }
 
 void myGame::mouse_button_callback(GLFWwindow *window, int button, int action, int mods) {
-         // 获取窗口用户指针，这里存储的是myGame实例
+
          myGame* currentGame = static_cast<myGame*>(glfwGetWindowUserPointer(window));
          
          // 左键按下时，且菜单不显示
          if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && currentGame && !currentGame->showMenu) {
-             std::cout << "左键被按下" << std::endl;
+             std::cout << gbk_to_utf8("按下左键").c_str() << std::endl;
              mshoot->shoot(camera->Position,camera->Front,10,3,glm::vec3(1.0f, 0.2f, 0.2f));
              // 可在此处添加交互逻辑（如选中物体）
          }
@@ -289,13 +353,41 @@ void myGame::mouse_button_callback(GLFWwindow *window, int button, int action, i
 // utility function for loading a 2D texture from file
 // ---------------------------------------------------
 
-void myGame::initImGui() {
+void myGame::initImGui() const
+{
     // ImGui初始化
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO(); (void)io;
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
+    
+    // 加载支持中文的字体
+    // 尝试加载系统字体：微软雅黑
+    const char* fontPath = R"(C:\Windows\Fonts\msyh.ttc)";
+    ImFont* font = nullptr;
+    
+    // 检查文件是否存在
+    if (FILE *file = fopen(fontPath, "r")) {
+        fclose(file);
+        // 加载字体，指定大小20.0f，并包含常用汉字字形
+        font = io.Fonts->AddFontFromFileTTF(fontPath, 20.0f, nullptr, io.Fonts->GetGlyphRangesChineseFull());
+    }
+    
+    if (font == nullptr) {
+         // 如果微软雅黑加载失败，尝试加载SimHei
+         fontPath = R"(C:\Windows\Fonts\simhei.ttf)";
+         if (FILE *file = fopen(fontPath, "r")) {
+            fclose(file);
+            font = io.Fonts->AddFontFromFileTTF(fontPath, 20.0f, nullptr, io.Fonts->GetGlyphRangesChineseFull());
+         }
+    }
+
+    if (font == nullptr) {
+        // 如果都失败了，回退到默认字体（不支持中文）
+        io.Fonts->AddFontDefault();
+        std::cout << "Warning: Failed to load Chinese font. Menu text may appear garbled." << std::endl;
+    }
 
     // 设置样式
     ImGui::StyleColorsDark();
@@ -348,27 +440,48 @@ void myGame::renderMenu() {
     float centerX = windowPos.x + windowSize.x * 0.5f;
     float centerY = windowPos.y + windowSize.y * 0.5f;
     
+    // ImGui::SetCursorScreenPos(ImVec2(centerX - 100, centerY - 60));
+    // ImGui::Text("=== 游戏菜单 ===");
+    // 
+    // ImGui::SetCursorScreenPos(ImVec2(centerX - 80, centerY - 20));
+    // ImGui::Text("当前分数: %d", score);
+    // 
+    // ImGui::SetCursorScreenPos(ImVec2(centerX - 100, centerY + 20));
+    // if (ImGui::Button("继续游戏", ImVec2(200, 30))) {
+    //     showMenu = false;
+    //     showText = true;
+    //     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    // }
+    // 
+    // ImGui::SetCursorScreenPos(ImVec2(centerX - 100, centerY + 60));
+    // if (ImGui::Button("退出游戏", ImVec2(200, 30))) {
+    //     glfwSetWindowShouldClose(window, true);
+    // }
+    // 
+    // ImGui::SetCursorScreenPos(ImVec2(centerX - 120, centerY + 100));
+    // ImGui::Text("按 ESC 键关闭菜单");
+
     // 渲染菜单项
     ImGui::SetCursorScreenPos(ImVec2(centerX - 100, centerY - 60));
-    ImGui::Text("=== 游戏菜单 ===");
+    ImGui::Text(gbk_to_utf8("=== 游戏菜单 ===").c_str());
     
     ImGui::SetCursorScreenPos(ImVec2(centerX - 80, centerY - 20));
-    ImGui::Text("当前分数: %d", score);
+    ImGui::Text(gbk_to_utf8("当前分数: %d").c_str(), score);
     
     ImGui::SetCursorScreenPos(ImVec2(centerX - 100, centerY + 20));
-    if (ImGui::Button("继续游戏", ImVec2(200, 30))) {
+    if (ImGui::Button(gbk_to_utf8("继续游戏").c_str(), ImVec2(200, 30))) {
         showMenu = false;
         showText = true;
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     }
     
     ImGui::SetCursorScreenPos(ImVec2(centerX - 100, centerY + 60));
-    if (ImGui::Button("退出游戏", ImVec2(200, 30))) {
+    if (ImGui::Button(gbk_to_utf8("退出游戏").c_str(), ImVec2(200, 30))) {
         glfwSetWindowShouldClose(window, true);
     }
     
     ImGui::SetCursorScreenPos(ImVec2(centerX - 120, centerY + 100));
-    ImGui::Text("按 ESC 键关闭菜单");
+    ImGui::Text(gbk_to_utf8("按 ESC 键关闭菜单").c_str());
     
     ImGui::End();
 }

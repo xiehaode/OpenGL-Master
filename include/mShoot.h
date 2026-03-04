@@ -29,13 +29,14 @@ public:
     void shoot(glm::vec3 pos, glm::vec3 dir, float speed = 10.0f,
                float lifetime = 3.0f, glm::vec3 color = glm::vec3(1.0f, 0.2f, 0.2f));
     // 更新所有子弹位置（deltaTime：帧间隔时间）
-    void update(float deltaTime);
+    void update(float deltaTime) override;
     // 覆盖 draw 方法
     void draw(glm::mat4 view, glm::mat4 projection) override;
+    void setP(float x1, float z1, float y1) override;
     std::vector<Bullet> bullets;
 private:
     // 初始化子弹渲染所需的缓冲对象
-    void initBuffers();
+    unsigned int initBuff() override;
     // 子弹数据
 
     // 渲染相关

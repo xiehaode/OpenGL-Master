@@ -20,13 +20,14 @@ public:
     // 覆盖 draw 方法
     void draw(glm::mat4 view,glm::mat4 projection) override;
     skyPosition p;
-    void setP(float x1,float z1);
+    void setP(float x1,float z1,float y1=0);
+    void update(float deltaTime) override;
 private:
-     void initBuff();
-     unsigned int loadCubemap(std::vector<std::string> faces);
+     unsigned int initBuff() override;
+     unsigned int loadCubeMap(std::vector<std::string> faces);
      unsigned int loadTexture(char const * path);
      unsigned int cubeTexture;
-     unsigned int cubemapTexture;
+     unsigned int cubeMapTexture;
 
      Shader* cubeShader;
      Shader* skyboxShader;

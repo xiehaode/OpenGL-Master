@@ -36,6 +36,8 @@ set(SOURCES
         src/collisionDetector.cpp
         src/imgui_impl_glfw.cpp
         src/imgui_impl_opengl3.cpp
+        src/lan_util.cpp
+        include/lan_util.h
         include/imgui_impl_opengl3_loader.h
         include/imgui_impl_glfw.h
         include/imgui_impl_opengl3.h

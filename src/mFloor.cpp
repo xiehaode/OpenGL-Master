@@ -27,7 +27,7 @@ void mFloor::draw(glm::mat4 view, glm::mat4 projection) {
     glBindVertexArray(0);
 }
 
-void mFloor::initBuff() {
+unsigned int mFloor::initBuff() {
     // plane VAO
     glGenVertexArrays(1, &planeVAO);
     glGenBuffers(1, &planeVBO);
@@ -39,6 +39,7 @@ void mFloor::initBuff() {
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
     glBindVertexArray(0);
+    return 1;
 }
 
 unsigned int mFloor::loadTexture(char const *path) {
@@ -75,4 +76,12 @@ unsigned int mFloor::loadTexture(char const *path) {
     }
 
     return textureID;
+}
+
+void mFloor::setP(float x1, float z1, float y1) {
+    // implementation
+}
+
+void mFloor::update(float deltaTime) {
+    // implementation
 }

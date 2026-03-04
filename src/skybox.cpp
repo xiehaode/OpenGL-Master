@@ -11,7 +11,7 @@ skybox::skybox() {
     cubeShader = new Shader(ResourceManager::getShaderPath("cubemaps.vs").c_str(), ResourceManager::getShaderPath("cubemaps.fs").c_str());
     skyboxShader = new Shader(ResourceManager::getShaderPath("skybox.vs").c_str(), ResourceManager::getShaderPath("skybox.fs").c_str());
     cubeTexture=loadTexture(ResourceManager::getTexturePath("container.jpg").c_str());
-    cubemapTexture =loadCubemap(faces);
+    cubeMapTexture =loadCubeMap(faces);
     initBuff();
     cubeShader->use();
     cubeShader->setInt("texture1", 0);
@@ -45,18 +45,18 @@ void skybox::draw(glm::mat4 view,glm::mat4 projection) {
     // skybox cube
     glBindVertexArray(skyboxVAO);
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, cubeMapTexture);
     glDrawArrays(GL_TRIANGLES, 0, 36);
     glBindVertexArray(0);
     glDepthFunc(GL_LESS); // set depth function back to default
 }
 
-void skybox::setP(float x1, float z1) {
+void skybox::setP(float x1, float z1,float y1) {
     p.x = x1;
     p.z = z1;
 }
 
-void skybox::initBuff() {
+unsigned int skybox::initBuff() {
 
     glGenVertexArrays(1, &cubeVAO);
     glGenBuffers(1, &cubeVBO);
@@ -75,6 +75,7 @@ void skybox::initBuff() {
     glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), &skyboxVertices, GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    return 1;
 }
 
 unsigned int skybox::loadTexture(char const * path)
@@ -114,7 +115,7 @@ unsigned int skybox::loadTexture(char const * path)
     return textureID;
 }
 
-unsigned int skybox::loadCubemap(std::vector<std::string> faces)
+unsigned int skybox::loadCubeMap(std::vector<std::string> faces)
 {
 
     unsigned int textureID;
@@ -143,4 +144,8 @@ unsigned int skybox::loadCubemap(std::vector<std::string> faces)
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
     return textureID;
+}
+
+void skybox::update(float deltaTime) {
+    // skybox usually doesn't need update, but interface requires it
 }

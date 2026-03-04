@@ -12,6 +12,9 @@ public:
     // view:  ”Õºæÿ’Û
     // projection: Õ∂”∞æÿ’Û
     virtual void draw(glm::mat4 view, glm::mat4 projection) = 0;
+    virtual void setP(float x1,float z1,float y1) = 0;
+    virtual void update(float deltaTime) = 0;
+    virtual unsigned int initBuff() = 0;
 };
 
 #endif //OBJECT_H

@@ -50,15 +50,15 @@ namespace Game {
         //返回负数表示初始化失败
         int myGlfwInit();
         static void framebuffer_size_callback(GLFWwindow* window, int width, int height);
-        static void mouse_callback(GLFWwindow* window, double xpos, double ypos);
-        static void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
+        static void mouse_callback(GLFWwindow* window, double xpos, double yPos);
+        static void scroll_callback(GLFWwindow* window, double xOffset, double yOffset);
         static void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
         void processInput(GLFWwindow *window);
         static glm::vec3 getRandomXZPosition();
         
-        // ImGui相关方法
-        void initImGui();
-        void cleanupImGui();
+
+        void initImGui() const;
+        static void cleanupImGui();
         void renderImGui();
         void renderMenu();
 
@@ -82,6 +82,8 @@ namespace Game {
         skybox *sky;
         mFloor *floor;
         mModel *model;
+        mModel *spirit; // 新增 spirit 模型指针
+        std::vector<mModel*> models; // 存储所有模型
         mText *text;
         collisionDetector *cd;
         static mShoot *mshoot;
@@ -91,7 +93,7 @@ namespace Game {
         GLboolean  Keys[1024];
         GLuint     Width, Height;
         
-        // ImGui相关
+
         bool showMenu;
         bool showText;
 

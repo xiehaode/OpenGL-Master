@@ -25,8 +25,8 @@ struct Character {
 
 class mText : public Object {
 public:
-    mText(const std::string& fontPath = "../resources/fonts/Antonio-Bold.ttf");
-    ~mText();
+    explicit mText(const std::string& fontPath = "../resources/fonts/Antonio-Bold.ttf");
+    ~mText() override;
 
     // 原始的 draw 方法，用于绘制特定文本
     void draw(const std::string& text, float x, float y, float scale,
@@ -35,6 +35,9 @@ public:
     // 实现 Object 接口的 draw 方法
     // 或者可以被实现为绘制默认文本
     void draw(glm::mat4 view, glm::mat4 projection) override;
+    void setP(float x1,float z1,float y1) override;
+    void update(float deltaTime) override;
+    unsigned int initBuff() override;
 
 private:
     std::map<GLchar, Character> Characters;

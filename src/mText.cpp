@@ -155,3 +155,15 @@ void mText::draw(glm::mat4 view, glm::mat4 projection) {
     // ÀýÈç£ºdraw("Default Text", 10.0f, 10.0f, 1.0f, glm::vec3(1.0f), projection);
     std::cout << "Warning: mText::draw(view, projection) called without text content." << std::endl;
 }
+
+void mText::setP(float x1, float z1, float y1) {
+    // implementation
+}
+
+void mText::update(float deltaTime) {
+    // implementation
+}
+
+unsigned int mText::initBuff() {
+    return 1;
+}
