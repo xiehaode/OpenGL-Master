@@ -22,11 +22,14 @@
 #include <random>
 #include <iostream>
 #include <collisionDetector.h>
-#include "skyBox.h"
+#include "skybox.h"
 #include "mFloor.h"
 #include "mModel.h"
 #include "mShoot.h"
 #include "mText.h"
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
 
 namespace Game {
 
@@ -52,6 +55,12 @@ namespace Game {
         static void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
         void processInput(GLFWwindow *window);
         static glm::vec3 getRandomXZPosition();
+        
+        // ImGui相关方法
+        void initImGui();
+        void cleanupImGui();
+        void renderImGui();
+        void renderMenu();
 
 
     private:
@@ -81,6 +90,10 @@ namespace Game {
         GameState  State;
         GLboolean  Keys[1024];
         GLuint     Width, Height;
+        
+        // ImGui相关
+        bool showMenu;
+        bool showText;
     };
 
 

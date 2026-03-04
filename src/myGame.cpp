@@ -3,6 +3,7 @@
 //
 #include "myGame.h"
 #include "stb_image.h"
+#include <iostream>
 namespace Game{
 
     unsigned int myGame::SCR_WIDTH = 800;
@@ -26,9 +27,15 @@ namespace Game{
          text = new mText();
          cd= new collisionDetector();
          score=0;
+         
+         // 初始化ImGui相关状态
+         showMenu = false;
+         showText = true;
+         initImGui();
      }
 
      myGame::~myGame() {
+         cleanupImGui();
          delete camera;
          delete sky;
          delete floor;
@@ -85,6 +92,7 @@ namespace Game{
 
             glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            
             //draw skybox
             sky->draw(camera->GetViewMatrix(),projection);
             //draw floor
@@ -94,10 +102,17 @@ namespace Game{
             //update mshoot and draw
             mshoot->update(deltaTime);
             mshoot->draw(camera->GetViewMatrix(),projection);
-            glm::mat4 textProjection = glm::ortho(0.0f, (float)SCR_WIDTH, 0.0f, (float)SCR_HEIGHT);
-            //draw text
-            string scoreText = "score:" + to_string(score);
-            text->draw(scoreText.c_str(),0,0,1.0f,glm::vec3(0.0f,0.0f,1.0f), textProjection);
+            
+            // 只有在showText为true时才绘制文本
+            if (showText) {
+                glm::mat4 textProjection = glm::ortho(0.0f, (float)SCR_WIDTH, 0.0f, (float)SCR_HEIGHT);
+                //draw text
+                string scoreText = "score:" + to_string(score);
+                text->draw(scoreText.c_str(),0,0,1.0f,glm::vec3(0.0f,0.0f,1.0f), textProjection);
+            }
+            
+            // 渲染ImGui
+            renderImGui();
 
             glfwSwapBuffers(window);
             glfwPollEvents();
@@ -128,6 +143,9 @@ namespace Game{
             return -1;
         }
         glfwMakeContextCurrent(window);
+        // 设置窗口用户指针，指向当前游戏实例
+        glfwSetWindowUserPointer(window, this);
+        
         glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
         glfwSetCursorPosCallback(window, mouse_callback);
         glfwSetScrollCallback(window, scroll_callback);
@@ -164,18 +182,36 @@ namespace Game{
 
 void myGame::processInput(GLFWwindow *window)
 {
+    static bool escPressed = false;
 
-    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-        glfwSetWindowShouldClose(window, true);
+    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
+        if (!escPressed) {
+            showMenu = !showMenu;
+            showText = !showMenu;
+            
+            // 切换鼠标模式
+            if (showMenu) {
+                glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+            } else {
+                glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+            }
+        }
+        escPressed = true;
+    } else {
+        escPressed = false;
+    }
 
-    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-        camera->ProcessKeyboard(FORWARD, deltaTime);
-    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-        camera->ProcessKeyboard(BACKWARD, deltaTime);
-    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-        camera->ProcessKeyboard(LEFT, deltaTime);
-    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-        camera->ProcessKeyboard(RIGHT, deltaTime);
+    // 只有在菜单不显示时才处理游戏控制
+    if (!showMenu) {
+        if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+            camera->ProcessKeyboard(FORWARD, deltaTime);
+        if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+            camera->ProcessKeyboard(BACKWARD, deltaTime);
+        if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+            camera->ProcessKeyboard(LEFT, deltaTime);
+        if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+            camera->ProcessKeyboard(RIGHT, deltaTime);
+    }
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
@@ -218,8 +254,11 @@ void myGame::scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 }
 
 void myGame::mouse_button_callback(GLFWwindow *window, int button, int action, int mods) {
-         // 左键按下时
-         if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
+         // 获取窗口用户指针，这里存储的是myGame实例
+         myGame* currentGame = static_cast<myGame*>(glfwGetWindowUserPointer(window));
+         
+         // 左键按下时，且菜单不显示
+         if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && currentGame && !currentGame->showMenu) {
              std::cout << "左键被按下" << std::endl;
              mshoot->shoot(camera->Position,camera->Front,10,3,glm::vec3(1.0f, 0.2f, 0.2f));
              // 可在此处添加交互逻辑（如选中物体）
@@ -229,5 +268,89 @@ void myGame::mouse_button_callback(GLFWwindow *window, int button, int action, i
 
 // utility function for loading a 2D texture from file
 // ---------------------------------------------------
+
+void myGame::initImGui() {
+    // ImGui初始化
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
+
+    // 设置样式
+    ImGui::StyleColorsDark();
+
+    // 绑定平台和渲染器
+    ImGui_ImplGlfw_InitForOpenGL(window, true);
+    ImGui_ImplOpenGL3_Init("#version 330 core");
+}
+
+void myGame::cleanupImGui() {
+    // 清理ImGui
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
+}
+
+void myGame::renderImGui() {
+    // 开始新的ImGui帧
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
+
+    // 如果显示菜单，渲染菜单
+    if (showMenu) {
+        renderMenu();
+    }
+
+    // 渲染ImGui
+    ImGui::Render();
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+}
+
+void myGame::renderMenu() {
+    // 创建一个全屏窗口作为菜单背景
+    ImGui::SetNextWindowPos(ImVec2(0, 0));
+    ImGui::SetNextWindowSize(ImGui::GetIO().DisplaySize);
+    ImGui::Begin("Game Menu", nullptr, 
+        ImGuiWindowFlags_NoTitleBar | 
+        ImGuiWindowFlags_NoResize | 
+        ImGuiWindowFlags_NoMove | 
+        ImGuiWindowFlags_NoCollapse |
+        ImGuiWindowFlags_NoBackground |
+        ImGuiWindowFlags_NoBringToFrontOnFocus);
+
+    // 居中显示菜单内容
+    ImVec2 windowSize = ImGui::GetWindowSize();
+    ImVec2 windowPos = ImGui::GetWindowPos();
+    
+    // 计算居中位置
+    float centerX = windowPos.x + windowSize.x * 0.5f;
+    float centerY = windowPos.y + windowSize.y * 0.5f;
+    
+    // 渲染菜单项
+    ImGui::SetCursorScreenPos(ImVec2(centerX - 100, centerY - 60));
+    ImGui::Text("=== 游戏菜单 ===");
+    
+    ImGui::SetCursorScreenPos(ImVec2(centerX - 80, centerY - 20));
+    ImGui::Text("当前分数: %d", score);
+    
+    ImGui::SetCursorScreenPos(ImVec2(centerX - 100, centerY + 20));
+    if (ImGui::Button("继续游戏", ImVec2(200, 30))) {
+        showMenu = false;
+        showText = true;
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    }
+    
+    ImGui::SetCursorScreenPos(ImVec2(centerX - 100, centerY + 60));
+    if (ImGui::Button("退出游戏", ImVec2(200, 30))) {
+        glfwSetWindowShouldClose(window, true);
+    }
+    
+    ImGui::SetCursorScreenPos(ImVec2(centerX - 120, centerY + 100));
+    ImGui::Text("按 ESC 键关闭菜单");
+    
+    ImGui::End();
+}
 
 }

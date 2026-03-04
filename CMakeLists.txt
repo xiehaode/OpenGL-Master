@@ -34,6 +34,11 @@ set(SOURCES
         src/mShoot.cpp
         src/mText.cpp
         src/collisionDetector.cpp
+        src/imgui_impl_glfw.cpp
+        src/imgui_impl_opengl3.cpp
+        include/imgui_impl_opengl3_loader.h
+        include/imgui_impl_glfw.h
+        include/imgui_impl_opengl3.h
         include/skybox.h
         include/mFloor.h
         include/mModel.h
