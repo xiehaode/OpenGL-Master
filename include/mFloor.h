@@ -9,11 +9,13 @@
 
 #include <learnopengl/shader_m.h>
 #include <vector>
+#include "Object.h"
 
-class mFloor {
+class mFloor : public Object {
 public:
      mFloor();
-    void draw(glm::mat4 view,glm::mat4 projection);
+    // 覆盖 draw 方法
+    void draw(glm::mat4 view,glm::mat4 projection) override;
 private:
      void initBuff();
      unsigned int loadTexture(char const * path);

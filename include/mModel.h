@@ -6,15 +6,18 @@
 #define MMODEL_H
 #include <learnopengl/shader_m.h>
 #include <learnopengl/model.h>
+#include "Object.h"
+
 struct modelPosition {
     float x;
     float z;
 };
 
-class mModel {
+class mModel : public Object {
 public:
     mModel();
-    void draw(glm::mat4 view,glm::mat4 projection);
+    // 覆盖 draw 方法
+    void draw(glm::mat4 view,glm::mat4 projection) override;
     void setP(float x1,float z1);
     modelPosition p;
 private:

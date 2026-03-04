@@ -42,5 +42,6 @@
 
 # 生成文件
 3rd
+resources
 bin
 cmake-build-debug

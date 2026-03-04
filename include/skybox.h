@@ -6,6 +6,7 @@
 #define SKYBOX_H
 #include <learnopengl/shader_m.h>
 #include <vector>
+#include "Object.h"
 
 struct skyPosition {
  float x;
@@ -13,10 +14,11 @@ struct skyPosition {
 
 };
 
-class skybox {
+class skybox : public Object {
 public:
      skybox();
-    void draw(glm::mat4 view,glm::mat4 projection);
+    // 覆盖 draw 方法
+    void draw(glm::mat4 view,glm::mat4 projection) override;
     skyPosition p;
     void setP(float x1,float z1);
 private:

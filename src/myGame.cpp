@@ -19,7 +19,8 @@ namespace Game{
 
      myGame::myGame() {
          myGlfwInit();
-         camera = new Camera((glm::vec3(0.0f, 0.0f, 3.0f)));
+         // 初始位置设为(0, 1.3, 3)，其中1.3 = 地面高度(-0.5) + 玩家高度(1.8)
+         camera = new Camera((glm::vec3(0.0f, 1.3f, 3.0f)));
          sky = new skybox();
          floor = new mFloor();
          model = new mModel();
@@ -87,6 +88,19 @@ namespace Game{
             }
 
             processInput(window);
+
+            // 物理模拟：应用重力和更新位置
+            verticalVelocity += gravity * deltaTime;
+            camera->Position.y += verticalVelocity * deltaTime;
+            
+            // 地面碰撞检测
+            if (camera->Position.y < groundHeight) {
+                camera->Position.y = groundHeight;
+                verticalVelocity = 0.0f;
+                isGrounded = true;
+            } else {
+                isGrounded = false;
+            }
 
             glm::mat4 projection = glm::perspective(glm::radians(camera->Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
 
@@ -167,13 +181,13 @@ namespace Game{
 
 
     glm::vec3 myGame::getRandomXZPosition() {
-         // 随机数引擎（仅初始化一次）
+         // 随机数引擎
          static std::random_device rd;
          static std::mt19937 gen(rd());
-         // 定义0到10之间的均匀分布（不包含10）
+         // 定义0到10之间的均匀分布
          static std::uniform_real_distribution<float> dist(0.0f, 10.0f);
 
-         // 生成X和Z轴随机值，Y轴设为0（或根据需求调整）
+         // 生成X和Z轴随机值，Y轴设为0
          float x = dist(gen);
          float z = dist(gen);
 
@@ -211,6 +225,12 @@ void myGame::processInput(GLFWwindow *window)
             camera->ProcessKeyboard(LEFT, deltaTime);
         if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
             camera->ProcessKeyboard(RIGHT, deltaTime);
+        
+        // 跳跃控制
+        if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS && isGrounded) {
+            verticalVelocity = jumpForce;
+            isGrounded = false;
+        }
     }
 }
 

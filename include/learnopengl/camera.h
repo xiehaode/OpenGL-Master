@@ -99,7 +99,7 @@ public:
             Position += horizontalRight * velocity;
 
         // 可选：强制锁定Y坐标（防止因浮点误差导致的微小垂直偏移）
-        Position.y = 0.0f; // 或设置为固定高度，如摄像机初始Y值
+        // Position.y = 0.0f; // 允许Y轴移动以支持跳跃
     }
 
     // processes input received from a mouse input system. Expects the offset value in both the x and y direction.
