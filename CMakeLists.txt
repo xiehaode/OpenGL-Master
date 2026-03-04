@@ -19,6 +19,10 @@ set(ASSIMP_LIB ${3RD_DIR}/assimp/lib/assimp-vc143-mt.lib)
 set(FREETYPE_INC ${3RD_DIR}/freetype/include)
 set(FREETYPE_LIB ${3RD_DIR}/freetype/lib/freetype.lib)
 
+set(IMGUI_INC ${3RD_DIR}/imgui/include)
+set(IMGUI_LIB ${3RD_DIR}/imgui/lib/imgui.lib)
+
+
 set(SOURCES
         src/main.cpp
         src/glad.c
@@ -53,6 +57,7 @@ target_include_directories(OpenGLGame2 PRIVATE
         ${GLFW_INC}
         ${ASSIMP_INC}
         ${FREETYPE_INC}
+        ${IMGUI_INC}
 )
 
 
@@ -61,6 +66,7 @@ target_link_libraries(OpenGLGame2 PRIVATE
         ${GLFW_LIB}
         ${ASSIMP_LIB}
         ${FREETYPE_LIB}
+        ${IMGUI_LIB}
 )
 
 
