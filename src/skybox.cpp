@@ -8,8 +8,8 @@
 
 skybox::skybox() {
     ResourceManager::printCurrentWorkingDirectory();
-    cubeShader = new Shader(ResourceManager::getShaderPath("6.1.cubemaps.vs").c_str(), ResourceManager::getShaderPath("6.1.cubemaps.fs").c_str());
-    skyboxShader = new Shader(ResourceManager::getShaderPath("6.1.skybox.vs").c_str(), ResourceManager::getShaderPath("6.1.skybox.fs").c_str());
+    cubeShader = new Shader(ResourceManager::getShaderPath("cubemaps.vs").c_str(), ResourceManager::getShaderPath("cubemaps.fs").c_str());
+    skyboxShader = new Shader(ResourceManager::getShaderPath("skybox.vs").c_str(), ResourceManager::getShaderPath("skybox.fs").c_str());
     cubeTexture=loadTexture(ResourceManager::getTexturePath("container.jpg").c_str());
     cubemapTexture =loadCubemap(faces);
     initBuff();

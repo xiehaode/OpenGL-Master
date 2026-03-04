@@ -7,7 +7,7 @@
 #include "ResourceManager.h"
 
 mFloor::mFloor() {
-    floorShader = new Shader(ResourceManager::getShaderPath("1.1.depth_testing.vs").c_str(), ResourceManager::getShaderPath("1.1.depth_testing.fs").c_str());
+    floorShader = new Shader(ResourceManager::getShaderPath("depth_testing.vs").c_str(), ResourceManager::getShaderPath("depth_testing.fs").c_str());
     floorTexture = loadTexture(ResourceManager::getTexturePath("metal.png").c_str());
     initBuff();
     floorShader->use();

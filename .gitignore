@@ -39,3 +39,7 @@
 
 # debug information files
 *.dwo
+
+生成文件
+bin
+cmake-build-debug
