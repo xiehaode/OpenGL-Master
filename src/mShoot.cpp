@@ -7,10 +7,11 @@
 #include <glm/glm.hpp>
 #include <glm/ext/matrix_transform.hpp>
 #include <iostream>
+#include "ResourceManager.h"
 
 mShoot::mShoot() {
     // 使用简单的纯色着色器
-    bulletShader = new Shader("shader/bullet.vs", "shader/bullet.fs");
+    bulletShader = new Shader(ResourceManager::getShaderPath("bullet.vs").c_str(), ResourceManager::getShaderPath("bullet.fs").c_str());
     initBuffers();
 
     // 初始化着色器（设置默认颜色，实际会被每个子弹的颜色覆盖）

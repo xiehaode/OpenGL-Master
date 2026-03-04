@@ -4,10 +4,11 @@
 
 #include "mFloor.h"
 #include  <stb_image.h>
+#include "ResourceManager.h"
 
 mFloor::mFloor() {
-    floorShader = new Shader("shader/1.1.depth_testing.vs", "shader/1.1.depth_testing.fs");
-    floorTexture = loadTexture("resources/textures/metal.png");
+    floorShader = new Shader(ResourceManager::getShaderPath("1.1.depth_testing.vs").c_str(), ResourceManager::getShaderPath("1.1.depth_testing.fs").c_str());
+    floorTexture = loadTexture(ResourceManager::getTexturePath("metal.png").c_str());
     initBuff();
     floorShader->use();
     floorShader->setInt("texture1", 0);

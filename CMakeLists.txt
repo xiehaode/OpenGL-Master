@@ -1,53 +1,66 @@
 cmake_minimum_required(VERSION 3.28)
 project(OpenGLGame2)
 
-find_package(OpenGL REQUIRED)
-
-# 查找 FreeType 库
-find_package(Freetype REQUIRED)
-
-# 查找GLFW3（修改后）
-find_package(glfw3 REQUIRED)  # 注意：在Ubuntu中通常是小写"glfw3"
-find_package(assimp REQUIRED)
-
 set(CMAKE_CXX_STANDARD 11)
-set(RESOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/resources)
-#file(COPY ${RESOURCE_DIR}/ DESTINATION ${BUILD_RESOURCE_DIR})
-#(my_app copy_resources)
 
-# 包含目录
-include_directories(
-        ${CMAKE_SOURCE_DIR}/include
-        ${GLFW3_INCLUDE_DIRS}  # 添加GLFW3头文件路径
-        ${FREETYPE_INCLUDE_DIRS}
-)
 
-# 添加可执行文件（修正语法）
-set(SOURCE_FILES
+
+set(3RD_DIR ${CMAKE_CURRENT_SOURCE_DIR}/3rd)
+set(SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
+set(INC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
+
+
+set(GLFW_INC ${3RD_DIR}/glfw3/include)
+set(GLFW_LIB ${3RD_DIR}/glfw3/lib/glfw3dll.lib)
+
+set(ASSIMP_INC ${3RD_DIR}/assimp/include)
+set(ASSIMP_LIB ${3RD_DIR}/assimp/lib/assimp-vc143-mt.lib)
+
+set(FREETYPE_INC ${3RD_DIR}/freetype/include)
+set(FREETYPE_LIB ${3RD_DIR}/freetype/lib/freetype.lib)
+
+set(SOURCES
         src/main.cpp
         src/glad.c
         src/myGame.cpp
         src/model.cpp
         src/skybox.cpp
-        include/skybox.h
         src/mFloor.cpp
-        include/mFloor.h
         src/mModel.cpp
-        include/mModel.h
         src/mShoot.cpp
-        include/mShoot.h
         src/mText.cpp
-        include/mText.h
         src/collisionDetector.cpp
+        include/skybox.h
+        include/mFloor.h
+        include/mModel.h
+        include/mShoot.h
+        include/mText.h
         include/collisionDetector.h
+        include/ResourceManager.h
 )
 
-add_executable(OpenGLGame2 ${SOURCE_FILES})  # 修正变量引用
+add_executable(OpenGLGame2 ${SOURCES})
 
-# 链接库（修改后）
-target_link_libraries(OpenGLGame2
-        ${OPENGL_LIBRARIES}  # 修正变量名
-        glfw  # Ubuntu中直接链接"glfw"
-        assimp::assimp
-        ${FREETYPE_LIBRARIES}
+set_target_properties(OpenGLGame2 PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bin
+        RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_CURRENT_SOURCE_DIR}/bin
+        RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_CURRENT_SOURCE_DIR}/bin
 )
+
+target_include_directories(OpenGLGame2 PRIVATE
+        ${INC_DIR}
+        ${SRC_DIR}
+        ${GLFW_INC}
+        ${ASSIMP_INC}
+        ${FREETYPE_INC}
+)
+
+
+target_link_libraries(OpenGLGame2 PRIVATE
+        opengl32
+        ${GLFW_LIB}
+        ${ASSIMP_LIB}
+        ${FREETYPE_LIB}
+)
+
+

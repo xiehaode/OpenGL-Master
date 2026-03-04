@@ -1,12 +1,13 @@
 //
-// Created by è°¢è±ª on 2025/8/20.
+// Created by Ð»ºÀ on 2025/8/20.
 //
 
 #include "mModel.h"
+#include "ResourceManager.h"
 
 mModel::mModel() {
-    modelShader = new Shader("shader/model_loading.vert", "shader/model_loading.frag");
-    ourModel = new Model("resources/objects/nanosuit/nanosuit.obj");
+    modelShader = new Shader(ResourceManager::getShaderPath("model_loading.vert").c_str(), ResourceManager::getShaderPath("model_loading.frag").c_str());
+    ourModel = new Model(ResourceManager::getModelPath("nanosuit/nanosuit.obj").c_str());
 }
 
 void mModel::draw(glm::mat4 view, glm::mat4 projection) {
@@ -35,5 +36,5 @@ void mModel::initBuff() {
 }
 
 unsigned int mModel::loadTexture(char const *path) {
-
+    return 0;
 }

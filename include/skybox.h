@@ -35,14 +35,14 @@ private:
     unsigned int skyboxVAO, skyboxVBO;
 
 
- std::vector<std::string> faces
- {
-  "resources/textures/skybox/right.jpg",
-  "resources/textures/skybox/left.jpg",
-  "resources/textures/skybox/top.jpg",
-  "resources/textures/skybox/bottom.jpg",
-  "resources/textures/skybox/front.jpg",
-  "resources/textures/skybox/back.jpg"
+std::vector<std::string> faces
+{
+ "../resources/textures/skybox/right.jpg",
+ "../resources/textures/skybox/left.jpg",
+ "../resources/textures/skybox/top.jpg",
+ "../resources/textures/skybox/bottom.jpg",
+ "../resources/textures/skybox/front.jpg",
+ "../resources/textures/skybox/back.jpg"
 };
     float cubeVertices[30 * 6] = {
         // positions          // texture Coords

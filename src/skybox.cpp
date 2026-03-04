@@ -4,11 +4,13 @@
 #include <stb_image.h>
 #include "skybox.h"
 #include <glm/ext/matrix_transform.hpp>
+#include "ResourceManager.h"
 
 skybox::skybox() {
-    cubeShader = new Shader("shader/6.1.cubemaps.vs", "shader/6.1.cubemaps.fs");
-    skyboxShader = new Shader("shader/6.1.skybox.vs", "shader/6.1.skybox.fs");
-    cubeTexture=loadTexture("resources/textures/container.jpg");
+    ResourceManager::printCurrentWorkingDirectory();
+    cubeShader = new Shader(ResourceManager::getShaderPath("6.1.cubemaps.vs").c_str(), ResourceManager::getShaderPath("6.1.cubemaps.fs").c_str());
+    skyboxShader = new Shader(ResourceManager::getShaderPath("6.1.skybox.vs").c_str(), ResourceManager::getShaderPath("6.1.skybox.fs").c_str());
+    cubeTexture=loadTexture(ResourceManager::getTexturePath("container.jpg").c_str());
     cubemapTexture =loadCubemap(faces);
     initBuff();
     cubeShader->use();
