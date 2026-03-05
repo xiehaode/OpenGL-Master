@@ -7,8 +7,8 @@
 #include <iostream>
 namespace Game{
 
-    unsigned int myGame::SCR_WIDTH = 800;
-    unsigned int myGame::SCR_HEIGHT = 600;
+    unsigned int myGame::SCR_WIDTH = 1200;
+    unsigned int myGame::SCR_HEIGHT = 800;
 
     // camera
 
@@ -40,11 +40,16 @@ namespace Game{
          planet->setP(5.0f, 5.0f, -0.5f);
          planet->setScale(glm::vec3(1.0f));
          models.push_back(planet);
+
+        mModel* castle = new mModel("Castle/JianZhu.obj");
+        planet->setP(5.0f, 10.0f, -0.5f);
+        planet->setScale(glm::vec3(1.0f));
+        models.push_back(castle);
          
          // 加载 Spirit 模型作为玩家角色
-         spirit = new mModel("spirit/body.obj");
+         spirit = new mModel("nanosuit/nanosuit.obj");
          spirit->setP(0.0f, 0.0f, -0.5f); // 初始位置
-         spirit->setScale(glm::vec3(0.5f));
+
          
          model = nanoSuit;
          
@@ -158,21 +163,12 @@ namespace Game{
                 if(m) m->draw(camera->GetViewMatrix(),projection);
             }
 
-            // 更新并绘制 Spirit 角色
-            // 让模型跟随摄像机位置，并在垂直方向上根据摄像机高度调整（假设摄像机是眼睛，模型在脚下）
-            // 摄像机高度初始为 1.3f，模型原点在脚底，所以偏移 1.3f
-            // 注意：地面高度 groundHeight 为 1.3f (对应camera.y)，实际物理地面可能是 -0.5f 或 0.0f
-            // 如果 mFloor 绘制在 0.0f (或 -0.5f)，我们需要匹配
-            // mFloor.h 中 vertices 是 y=-0.0f。所以地面在 0。
-            // 之前的 draw 用 -0.5f 可能是为了把中心在 (0,0,0) 的模型下沉一半高度？
-            // 假设 Spirit 模型原点在脚底，则应放在 camera.y - 1.8f (假设人高1.8，眼睛在1.8)
-            // 这里我们试探性地放在 camera.y - 1.8f
+
             
             if (spirit) {
-                // spirit->setP(camera->Position.x, camera->Position.z, camera->Position.y - 1.8f);
-                // 设置朝向：让模型背对摄像机（即面向摄像机的前方），摄像机 Yaw 0 指向 -Z
-                // 我们需要模型旋转 -Yaw - 90 度 (根据 LearnOpenGL 的 Euler 角定义)
-                // spirit->yaw = -camera->Yaw - 90.0f; 
+
+                spirit->setP(camera->Position.x, camera->Position.z);
+                spirit->setScale(glm::vec3(0.001f));
                 spirit->draw(camera->GetViewMatrix(), projection);
             }
 
@@ -186,6 +182,7 @@ namespace Game{
                 glm::mat4 textProjection = glm::ortho(0.0f, (float)SCR_WIDTH, 0.0f, (float)SCR_HEIGHT);
                 //draw text
                 string scoreText = "score:" + to_string(score);
+                scoreText = utf8_to_gbk(scoreText);
                 text->draw(scoreText,0,0,1.0f,glm::vec3(0.0f,0.0f,1.0f), textProjection);
             }
             

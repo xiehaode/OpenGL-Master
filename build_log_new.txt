@@ -1,0 +1,6 @@
+[1/2] Building CXX object CMakeFiles\OpenGLGame2.dir\src\myGame.cpp.obj
+FAILED: CMakeFiles/OpenGLGame2.dir/src/myGame.cpp.obj 
+D:\vs\vs2022\VC\Tools\MSVC\14.42.34433\bin\Hostx64\x64\cl.exe  /nologo /TP  -ID:\CLionPro\CLionProjects\OpengLGame2\include -ID:\CLionPro\CLionProjects\OpengLGame2\src -ID:\CLionPro\CLionProjects\OpengLGame2\3rd\glfw3\include -ID:\CLionPro\CLionProjects\OpengLGame2\3rd\assimp\include -ID:\CLionPro\CLionProjects\OpengLGame2\3rd\freetype\include -ID:\CLionPro\CLionProjects\OpengLGame2\3rd\imgui\include /DWIN32 /D_WINDOWS /EHsc /Ob0 /Od /RTC1 -MDd -Zi /showIncludes /FoCMakeFiles\OpenGLGame2.dir\src\myGame.cpp.obj /FdCMakeFiles\OpenGLGame2.dir\ /FS -c D:\CLionPro\CLionProjects\OpengLGame2\src\myGame.cpp
+D:\CLionPro\CLionProjects\OpengLGame2\src\myGame.cpp(1): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+D:\CLionPro\CLionProjects\OpengLGame2\3rd\glfw3\include\GLFW/glfw3.h(103): fatal error C1083: 无法打开包括文件: “stddef.h”: No such file or directory
+ninja: build stopped: subcommand failed.
